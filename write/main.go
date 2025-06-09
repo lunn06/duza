@@ -1,4 +1,4 @@
-package main
+package write
 
 import (
 	"bytes"
@@ -12,53 +12,40 @@ import (
 	"unicode/utf8"
 )
 
-func main() {
-	//fileBytes, err := os.ReadFile("image.jpg")
-	fileBytes, err := os.ReadFile("image2.png")
+func Write(filePath, secret, outPath string) error {
+	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	//img, err := jpeg.Decode(bytes.NewReader(fileBytes))
 	img, err := png.Decode(bytes.NewReader(fileBytes))
 	if err != nil {
-		panic(err)
+		return err
 	}
-	//img, err := png.Decode(bytes.NewReader(fileBytes))
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//secret, err := os.ReadFile("1")
-	//if err != nil {
-	//	panic(err)
-	//}
-	secret := "hello"
 
 	nrgba := image.NewNRGBA64(img.Bounds())
 	draw.Draw(nrgba, img.Bounds(), img, img.Bounds().Min, draw.Src)
 	offset, err := InsertInfo(uint(len(secret)*8), nrgba)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = InsertSecret(secret, nrgba, stego.Delta, offset)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
-	outFile, err := os.Create("output.png")
+	outFile, err := os.Create(outPath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer outFile.Close()
 
-	//if err = jpeg.Encode(outFile, rgba, &jpeg.Options{Quality: 100}); err != nil {
-	//	panic(err)
-	//}
 	if err = png.Encode(outFile, nrgba); err != nil {
-		panic(err)
+		return err
 	}
+
+	return nil
 }
 
 func InsertInfo(info uint, data *image.NRGBA64) (int, error) {

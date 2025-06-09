@@ -20,6 +20,7 @@ require (
 	github.com/go-errors/errors v1.1.1 // indirect
 	github.com/go-xmlfmt/xmlfmt v0.0.0-20191208150333-d5b6f63a941b // indirect
 	github.com/golang/geo v0.0.0-20200319012246-673a6f80352d // indirect
+	github.com/urfave/cli/v3 v3.3.3 // indirect
 	golang.org/x/net v0.0.0-20200707034311-ab3426394381 // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

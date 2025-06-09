@@ -1,4 +1,4 @@
-package main
+package read
 
 import (
 	"bytes"
@@ -12,37 +12,32 @@ import (
 	"unicode/utf8"
 )
 
-func main() {
-	fileBytes, err := os.ReadFile("output.png")
+func Read(filePath string) (string, error) {
+	fileBytes, err := os.ReadFile(filePath)
 	if err != nil {
 		panic(err)
 	}
 	img, err := png.Decode(bytes.NewReader(fileBytes))
-	//img, err := jpeg.Decode(bytes.NewReader(fileBytes))
 	if err != nil {
 		panic(err)
 	}
 
 	nrgba, ok := img.(*image.RGBA64)
 	if !ok {
-		panic(fmt.Sprintf("expected *image.RGBA64, got = %T", img))
+		return "", fmt.Errorf("expected *image.RGBA64, got = %T", img)
 	}
 
 	info, err := GetInfo(nrgba)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	secret, err := GetSecret(nrgba, info, 1, bits.UintSize)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
-	fmt.Println(secret)
-	//err = os.WriteFile("2", secret, 0644)
-	//if err != nil {
-	//	panic(err)
-	//}
+	return secret, nil
 }
 
 func GetInfo(data *image.RGBA64) (uint, error) {

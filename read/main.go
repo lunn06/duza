@@ -3,9 +3,9 @@ package read
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"image"
 	"image/color"
+	"image/draw"
 	"image/png"
 	"math/bits"
 	"os"
@@ -23,9 +23,10 @@ func Read(filePath string) (string, error) {
 		panic(err)
 	}
 
-	nrgba, ok := img.(*image.RGBA64)
+	nrgba, ok := img.(*image.NRGBA64)
 	if !ok {
-		return "", fmt.Errorf("expected *image.RGBA64, got = %T", img)
+		nrgba = image.NewNRGBA64(img.Bounds())
+		draw.Draw(nrgba, img.Bounds(), img, img.Bounds().Min, draw.Over)
 	}
 
 	info, err := GetInfo(nrgba)
@@ -41,7 +42,7 @@ func Read(filePath string) (string, error) {
 	return secret, nil
 }
 
-func GetInfo(data *image.RGBA64) (uint, error) {
+func GetInfo(data *image.NRGBA64) (uint, error) {
 	bounds := data.Bounds()
 	if bits.UintSize > bounds.Max.X*bounds.Max.Y*3 {
 		return 0, errors.New("secret too large")
@@ -52,7 +53,7 @@ func GetInfo(data *image.RGBA64) (uint, error) {
 	y := bounds.Min.Y
 	var i, info uint
 	for j := range bits.UintSize {
-		c := data.RGBA64At(x, y)
+		c := data.NRGBA64At(x, y)
 
 		var b uint16
 		switch {
@@ -81,7 +82,7 @@ func GetInfo(data *image.RGBA64) (uint, error) {
 	return info, nil
 }
 
-func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error) {
+func GetSecret(data *image.NRGBA64, info uint, delta, offset int) (string, error) {
 	bounds := data.Bounds()
 	if offset > bounds.Max.X*bounds.Max.Y*(1<<delta)*3 {
 		return "", errors.New("secret too large")
@@ -100,7 +101,7 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 		y += offset / maxX
 	}
 
-	changeB := func(c color.RGBA64) uint16 {
+	changeB := func(c color.NRGBA64) uint16 {
 		var b uint16
 		switch {
 		case i == 0:
@@ -130,7 +131,7 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 	for k := uint(0); k < info; {
 		var runeLen int
 		for j := range stego.UTF8Len {
-			c := data.RGBA64At(x, y)
+			c := data.NRGBA64At(x, y)
 			b := changeB(c)
 			runeLen += int(b * (1 << j))
 
@@ -140,7 +141,7 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 
 		var s rune
 		for j := range runeLen * 8 {
-			c := data.RGBA64At(x, y)
+			c := data.NRGBA64At(x, y)
 			b := changeB(c)
 			s += rune(b * (1 << j))
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"image"
+	"image/color"
 	"image/draw"
 	"image/png"
 	"math/bits"
@@ -33,16 +34,17 @@ func main() {
 	//if err != nil {
 	//	panic(err)
 	//}
-	secret := "hello"
+	secret := "1234567890"
 
 	nrgba := image.NewNRGBA64(img.Bounds())
 	draw.Draw(nrgba, img.Bounds(), img, img.Bounds().Min, draw.Src)
-	offset, err := InsertInfo(uint(len(secret)*8), nrgba)
+
+	c, err := InsertSecret(secret, nrgba, stego.Delta, 21)
 	if err != nil {
 		panic(err)
 	}
 
-	err = InsertSecret(secret, nrgba, stego.Delta, offset)
+	_, err = InsertInfo(uint(c), nrgba)
 	if err != nil {
 		panic(err)
 	}
@@ -102,44 +104,72 @@ func InsertInfo(info uint, data *image.NRGBA64) (int, error) {
 	return counter, nil
 }
 
-func InsertSecret(secret string, data *image.NRGBA64, delta, offset int) error {
+func InsertSecret(secret string, data *image.NRGBA64, delta, offset int) (int, error) {
 	bounds := data.Bounds()
 	if len(secret)*8/delta > bounds.Max.X*bounds.Max.Y*(1<<delta)*3 {
-		return errors.New("secret too large")
+		return 0, errors.New("secret too large")
 	}
 
-	x := bounds.Min.X + offset
-	maxX := bounds.Max.X
-	y := bounds.Min.Y
-	i := 0
-	for _, s := range secret {
-		for j := range utf8.RuneLen(s) * 8 {
-			b := uint16(stego.GetBit(s, j))
+	var (
+		x    = bounds.Min.X + offset
+		maxX = bounds.Max.X
+		y    = bounds.Min.Y
 
-			c := data.NRGBA64At(x, y)
-			switch {
-			case i == 0:
-				c.R = stego.ClearLastBits(c.R, 1) + b
-			case i == 1:
-				c.G = stego.ClearLastBits(c.G, 1) + b
-			case i == 2:
-				c.B = stego.ClearLastBits(c.B, 1) + b
-			}
+		i, counter int
+	)
 
-			data.SetNRGBA64(x, y, c)
+	changeC := func(b uint16) color.NRGBA64 {
+		c := data.NRGBA64At(x, y)
+		switch {
+		case i == 0:
+			c.R = stego.ClearLastBits(c.R, 1) + b
+		case i == 1:
+			c.G = stego.ClearLastBits(c.G, 1) + b
+		case i == 2:
+			c.B = stego.ClearLastBits(c.B, 1) + b
+		}
+		return c
+	}
 
-			i++
-			if i < 3 {
-				continue
-			}
-			i = 0
-			x++
-			if x == maxX {
-				x = 0
-				y++
-			}
+	incXYI := func() {
+		i++
+		if i < 3 {
+			return
+		}
+		i = 0
+		x++
+		if x == maxX {
+			x = 0
+			y++
 		}
 	}
 
-	return nil
+	for _, s := range secret {
+		runeLen := utf8.RuneLen(s)
+		if runeLen == -1 {
+			return 0, errors.New("invalid secret")
+		}
+		for j := range 3 {
+			b := uint16(stego.GetBit(runeLen, j))
+			c := changeC(b)
+
+			data.SetNRGBA64(x, y, c)
+
+			counter++
+			incXYI()
+		}
+
+		for j := range runeLen * 8 {
+			b := uint16(stego.GetBit(s, j))
+
+			c := changeC(b)
+
+			data.SetNRGBA64(x, y, c)
+
+			counter++
+			incXYI()
+		}
+	}
+
+	return counter, nil
 }

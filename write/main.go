@@ -34,12 +34,12 @@ func main() {
 	//if err != nil {
 	//	panic(err)
 	//}
-	secret := "1234567890"
+	secret := "test1234567890"
 
 	nrgba := image.NewNRGBA64(img.Bounds())
 	draw.Draw(nrgba, img.Bounds(), img, img.Bounds().Min, draw.Src)
 
-	c, err := InsertSecret(secret, nrgba, stego.Delta, 21)
+	c, err := InsertSecret(secret, nrgba, stego.Delta, stego.OffsetLen)
 	if err != nil {
 		panic(err)
 	}
@@ -149,7 +149,7 @@ func InsertSecret(secret string, data *image.NRGBA64, delta, offset int) (int, e
 		if runeLen == -1 {
 			return 0, errors.New("invalid secret")
 		}
-		for j := range 3 {
+		for j := range stego.UT8Len {
 			b := uint16(stego.GetBit(runeLen, j))
 			c := changeC(b)
 

@@ -3,12 +3,12 @@ package stego
 import (
 	"image"
 	"image/color"
-	"math/bits"
 )
 
 const (
-	Delta           = 1 << 0
-	InfoPixelsCount = bits.UintSize / Delta
+	Delta     = 1 << 0
+	UT8Len    = 3
+	OffsetLen = 64
 )
 
 func GetBit[T int | rune | byte | uint | uint16](b T, idx int) T {

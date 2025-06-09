@@ -34,7 +34,7 @@ func main() {
 		panic(err)
 	}
 
-	secret, err := GetSecret(nrgba, info, 1, 21)
+	secret, err := GetSecret(nrgba, info, stego.Delta, stego.OffsetLen)
 	if err != nil {
 		panic(err)
 	}
@@ -134,7 +134,7 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 
 	for k := uint(0); k < info; {
 		var runeLen int
-		for j := range 3 {
+		for j := range stego.UT8Len {
 			c := data.RGBA64At(x, y)
 			b := changeB(c)
 			runeLen += int(b * (1 << j))
@@ -142,7 +142,6 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 			incXYI()
 			k++
 		}
-		//secret = append(secret, s)
 
 		var s rune
 		for j := range runeLen * 8 {
@@ -154,7 +153,12 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 			k++
 
 		}
-		secret = utf8.AppendRune(secret, s)
+
+		if utf8.ValidRune(s) {
+			secret = utf8.AppendRune(secret, s)
+		} else {
+			return "", errors.New("invalid UTF-8")
+		}
 	}
 
 	return string(secret), nil

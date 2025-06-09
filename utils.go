@@ -1,15 +1,12 @@
 package stego
 
-import (
-	"math/bits"
-)
-
 const (
-	Delta           = 1 << 0
-	InfoPixelsCount = bits.UintSize / Delta
+	Delta     = 1 << 0
+	OffsetLen = 64
+	UTF8Len   = 3
 )
 
-func GetBit[T rune | byte | uint | uint16](b T, idx int) T {
+func GetBit[T int | rune | byte | uint | uint16](b T, idx int) T {
 	return (b >> idx) & 0x01
 }
 

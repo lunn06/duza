@@ -129,7 +129,7 @@ func GetSecret(data *image.RGBA64, info uint, delta, offset int) (string, error)
 
 	for k := uint(0); k < info; {
 		var runeLen int
-		for j := range stego.UT8Len {
+		for j := range stego.UTF8Len {
 			c := data.RGBA64At(x, y)
 			b := changeB(c)
 			runeLen += int(b * (1 << j))

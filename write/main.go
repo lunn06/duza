@@ -136,7 +136,7 @@ func InsertSecret(secret string, data *image.NRGBA64, delta, offset int) (int, e
 		if runeLen == -1 {
 			return 0, errors.New("invalid secret")
 		}
-		for j := range stego.UT8Len {
+		for j := range stego.UTF8Len {
 			b := uint16(stego.GetBit(runeLen, j))
 			c := changeC(b)
 

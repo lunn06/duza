@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/urfave/cli/v3"
+
 	"github.com/lunn06/stego/read"
 	"github.com/lunn06/stego/write"
-
-	"github.com/urfave/cli/v3"
 )
 
 var cmd = &cli.Command{

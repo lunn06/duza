@@ -148,7 +148,6 @@ func GetSecret(data *image.NRGBA64, info uint, delta, offset int) (string, error
 
 			incXYI()
 			k++
-
 		}
 
 		if utf8.ValidRune(s) {

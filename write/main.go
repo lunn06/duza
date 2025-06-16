@@ -9,8 +9,9 @@ import (
 	"image/png"
 	"math/bits"
 	"os"
-	"stego"
 	"unicode/utf8"
+
+	"github.com/lunn06/stego"
 )
 
 func Write(filePath, secret, outPath string) error {

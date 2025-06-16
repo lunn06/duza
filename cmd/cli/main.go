@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"stego/read"
-	"stego/write"
+
+	"github.com/lunn06/stego/read"
+	"github.com/lunn06/stego/write"
 
 	"github.com/urfave/cli/v3"
 )

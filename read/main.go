@@ -9,8 +9,9 @@ import (
 	"image/png"
 	"math/bits"
 	"os"
-	"stego"
 	"unicode/utf8"
+
+	"github.com/lunn06/stego"
 )
 
 func Read(filePath string) (string, error) {

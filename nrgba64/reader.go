@@ -23,12 +23,12 @@ type Image interface {
 }
 
 func ReadString(img Image) (string, error) {
-	return NewNRGBA64StringReader(img).ReadString()
+	return NewStringReader(img).ReadString()
 }
 
-func NewNRGBA64StringReader(img Image) *NRGBA64StringReader {
+func NewStringReader(img Image) *StringReader {
 	bounds := img.Bounds()
-	return &NRGBA64StringReader{
+	return &StringReader{
 		c:   rgb.Red,
 		img: img,
 		x:   bounds.Min.X,
@@ -36,13 +36,13 @@ func NewNRGBA64StringReader(img Image) *NRGBA64StringReader {
 	}
 }
 
-type NRGBA64StringReader struct {
+type StringReader struct {
 	img     Image
 	x, y, n int
 	c       rgb.RGB
 }
 
-func (reader *NRGBA64StringReader) ReadByte() (byte, error) {
+func (reader *StringReader) ReadByte() (byte, error) {
 	var b byte
 	for j := range byteSize {
 		colorValue, ok := reader.nextColor()
@@ -57,7 +57,7 @@ func (reader *NRGBA64StringReader) ReadByte() (byte, error) {
 	return b, nil
 }
 
-func (reader *NRGBA64StringReader) Read(p []byte) (int, error) {
+func (reader *StringReader) Read(p []byte) (int, error) {
 	lastN := reader.n
 	for i := range len(p) {
 		b, err := reader.ReadByte()
@@ -71,7 +71,7 @@ func (reader *NRGBA64StringReader) Read(p []byte) (int, error) {
 	return reader.n - lastN, nil
 }
 
-func (reader *NRGBA64StringReader) ReadString() (string, error) {
+func (reader *StringReader) ReadString() (string, error) {
 	var b strings.Builder
 	for {
 		r, n, err := reader.ReadRune()
@@ -89,7 +89,7 @@ func (reader *NRGBA64StringReader) ReadString() (string, error) {
 	}
 }
 
-func (reader *NRGBA64StringReader) ReadRune() (rune, int, error) {
+func (reader *StringReader) ReadRune() (rune, int, error) {
 	runeBytes, bytesCount, err := reader.readRuneBytes()
 	if err != nil && !errors.Is(err, io.EOF) {
 		return 0, bytesCount, err
@@ -103,7 +103,7 @@ func (reader *NRGBA64StringReader) ReadRune() (rune, int, error) {
 	return r, size, err
 }
 
-func (reader *NRGBA64StringReader) readRuneBytes() ([]byte, int, error) {
+func (reader *StringReader) readRuneBytes() ([]byte, int, error) {
 	runeBytes := make([]byte, 0, utf8.UTFMax)
 	for i := range utf8.UTFMax {
 		b, err := reader.ReadByte()
@@ -121,7 +121,7 @@ func (reader *NRGBA64StringReader) readRuneBytes() ([]byte, int, error) {
 	return runeBytes, len(runeBytes), nil
 }
 
-func (reader *NRGBA64StringReader) nextColor() (uint16, bool) {
+func (reader *StringReader) nextColor() (uint16, bool) {
 	color := reader.img.NRGBA64At(reader.x, reader.y)
 	value := reader.c.NRGBA64Value(color)
 

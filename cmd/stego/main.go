@@ -3,13 +3,20 @@ package main
 import (
 	"context"
 	"fmt"
+	"image"
+	"image/draw"
+	"image/png"
 	"os"
 
+	"github.com/lunn06/stego/nrgba64"
 	"github.com/urfave/cli/v3"
-
-	"github.com/lunn06/stego/read"
-	"github.com/lunn06/stego/write"
 )
+
+func main() {
+	if err := cmd.Run(context.Background(), os.Args); err != nil {
+		panic(err)
+	}
+}
 
 var cmd = &cli.Command{
 	Commands: []*cli.Command{
@@ -28,11 +35,36 @@ var cmd = &cli.Command{
 				},
 			},
 			Action: func(ctx context.Context, cmd *cli.Command) error {
-				return write.Write(
-					cmd.StringArg("sourcePath"),
-					cmd.StringArg("secret"),
-					cmd.StringArg("outPath"),
-				)
+				file, err := os.Open(cmd.StringArg("sourcePath"))
+				if err != nil {
+					return err
+				}
+				defer func() { _ = file.Close() }()
+
+				img, err := png.Decode(file)
+				if err != nil {
+					return err
+				}
+
+				nrgba := image.NewNRGBA64(img.Bounds())
+				draw.Draw(nrgba, img.Bounds(), img, img.Bounds().Min, draw.Src)
+
+				_, err = nrgba64.WriteStringToNRGBA64(nrgba, cmd.StringArg("secret"))
+				if err != nil {
+					return err
+				}
+
+				outFile, err := os.Create(cmd.StringArg("outPath"))
+				if err != nil {
+					return err
+				}
+				defer func() { _ = outFile.Close() }()
+
+				if err = png.Encode(outFile, nrgba); err != nil {
+					return err
+				}
+
+				return nil
 			},
 		},
 
@@ -45,23 +77,32 @@ var cmd = &cli.Command{
 				},
 			},
 			Action: func(ctx context.Context, cmd *cli.Command) error {
-				secret, err := read.Read(
-					cmd.StringArg("sourcePath"),
-				)
+				file, err := os.Open(cmd.StringArg("sourcePath"))
+				if err != nil {
+					return err
+				}
+				defer func() { _ = file.Close() }()
+
+				img, err := png.Decode(file)
 				if err != nil {
 					return err
 				}
 
-				fmt.Print(secret)
+				nrgba, ok := img.(*image.NRGBA64)
+				if !ok {
+					nrgba = image.NewNRGBA64(img.Bounds())
+					draw.Draw(nrgba, img.Bounds(), img, img.Bounds().Min, draw.Over)
+				}
+
+				s, err := nrgba64.ReadString(nrgba)
+				if err != nil {
+					return err
+				}
+
+				fmt.Println(s)
 
 				return nil
 			},
 		},
 	},
-}
-
-func main() {
-	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		panic(err)
-	}
 }

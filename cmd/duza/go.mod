@@ -1,9 +1,9 @@
-module github.com/lunn06/stego/cmd/stego
+module github.com/lunn06/duza/cmd/duza
 
 go 1.25
 
 require (
-	github.com/lunn06/stego v0.2.0
+	github.com/lunn06/duza v0.3.0
 	github.com/urfave/cli/v3 v3.4.1
 )
 

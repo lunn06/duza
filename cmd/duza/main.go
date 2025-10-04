@@ -8,7 +8,7 @@ import (
 	"image/png"
 	"os"
 
-	"github.com/lunn06/stego/nrgba64"
+	"github.com/lunn06/duza/nrgba64"
 	"github.com/urfave/cli/v3"
 )
 

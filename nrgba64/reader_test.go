@@ -3,7 +3,7 @@ package nrgba64_test
 import (
 	"testing"
 
-	"github.com/lunn06/stego/nrgba64"
+	"github.com/lunn06/duza/nrgba64"
 )
 
 func TestReadStringFromNRGBA64(t *testing.T) {

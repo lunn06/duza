@@ -4,8 +4,8 @@ import (
 	"image/color"
 	"io"
 
-	"github.com/lunn06/stego/internal/bit"
-	"github.com/lunn06/stego/internal/rgb"
+	"github.com/lunn06/duza/internal/bit"
+	"github.com/lunn06/duza/internal/rgb"
 )
 
 func WriteStringToNRGBA64(img Image, s string) (int, error) {

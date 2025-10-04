@@ -1,4 +1,4 @@
-module github.com/lunn06/stego
+module github.com/lunn06/duza
 
 go 1.25
 

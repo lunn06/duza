@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/lunn06/stego/nrgba64"
+	"github.com/lunn06/duza/nrgba64"
 )
 
 func TestWriteStringToNRGBA64(t *testing.T) {

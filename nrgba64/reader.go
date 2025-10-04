@@ -8,8 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/lunn06/stego/internal/bit"
-	"github.com/lunn06/stego/internal/rgb"
+	"github.com/lunn06/duza/internal/bit"
+	"github.com/lunn06/duza/internal/rgb"
 )
 
 const byteSize = 8
